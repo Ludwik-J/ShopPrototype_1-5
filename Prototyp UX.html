@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dobierz legowisko - Konfigurator LivaMio</title>
+    <style>
+        :root {
+            --primary: #5c4335;          /* Głęboki, ciepły brąz */
+            --primary-hover: #422f24;    /* Ciemniejszy brąz */
+            --accent: #8c735d;           /* Taupe / beż */
+            --accent-soft: #f4efea;      /* Miękki beż tła */
+            --bg-main: #fcfbf9;          /* Ecru / złamana biel */
+            --card-bg: #ffffff;
+            --text-main: #2b2623;        /* Ciemny brąz */
+            --text-muted: #786e65;      /* Stonowany brąz */
+            --border-color: #e8e2d9;    /* Ciepła ramka */
+            --accent-green: #6b705c;    /* Oliwkowa zieleń */
+            --accent-green-bg: #f0f2ed;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            padding: 24px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .app-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        /* SIDEBAR / BAZA PROFILE */
+        .sidebar {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            position: sticky;
+            top: 24px;
+            box-shadow: 0 4px 20px rgba(92, 67, 53, 0.04);
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+        }
+
+        .sidebar-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--primary);
+            letter-spacing: -0.2px;
+        }
+
+        .btn-edit-profile {
+            background: transparent;
+            border: 1px solid #b8aea5;
+            color: #5d534b;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit-profile:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background-color: var(--accent-soft);
+        }
+
+        .summary-item {
+            margin-bottom: 10px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .summary-item span:first-child {
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .summary-value-right {
+            text-align: right;
+            word-break: break-word;
+            color: var(--text-main);
+        }
+
+        .save-profile-box {
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .alert-update {
+            background-color: #fff8f0;
+            border: 1px solid #e2cbba;
+            color: #6e4123;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            margin-bottom: 14px;
+        }
+
+        /* GŁÓWNY KONTENER KONFIGURATORA */
+        .main-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(92, 67, 53, 0.04);
+            transition: padding 0.2s ease;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.3px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            margin-top: 6px;
+            margin-bottom: 24px;
+            font-size: 13px;
+        }
+
+        .btn-header-edit {
+            background: var(--accent-soft);
+            border: 1px solid var(--border-color);
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-header-edit:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* STYL ZWINIĘTEGO PANELU */
+        .main-content.collapsed {
+            padding: 18px 24px;
+            cursor: pointer;
+        }
+
+        .main-content.collapsed .header h1 {
+            font-size: 17px;
+            margin: 0;
+        }
+
+        /* KROKI FORMULARZA */
+        .step-block {
+            margin-bottom: 20px;
+            padding: 18px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: #fff;
+            transition: border-color 0.2s, opacity 0.2s;
+        }
+
+        .step-block.disabled {
+            opacity: 0.45;
+            pointer-events: none;
+            background: #faf8f5;
+        }
+
+        .step-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--primary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .species-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .species-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            background: #fff;
+            color: var(--text-main);
+            transition: all 0.2s ease;
+        }
+
+        .species-card:hover {
+            border-color: var(--accent);
+            background-color: var(--accent-soft);
+        }
+
+        .species-card.selected {
+            border-color: var(--primary);
+            background-color: var(--accent-soft);
+            color: var(--primary);
+        }
+
+        .input-text, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            color: var(--text-main);
+            background-color: #fff;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-text:focus, select:focus {
+            border-color: var(--primary);
+        }
+
+        .measure-info-card {
+            background: var(--accent-soft);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 12px;
+            color: var(--text-main);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .measure-img {
+            width: 80px;
+            height: 50px;
+            background: #e6dfd5;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 10px;
+            color: var(--primary);
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .tag-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .tag {
+            border: 1px solid var(--border-color);
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            background: #fff;
+            color: var(--text-main);
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            border-color: var(--accent);
+            background-color: var(--accent-soft);
+        }
+
+        .tag.selected {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .dimensions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 14px;
+            transition: background 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-save {
+            width: 100%;
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 8px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-save:hover {
+            opacity: 0.9;
+        }
+
+        .health-alert {
+            background: var(--accent-soft);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            margin-top: 12px;
+        }
+
+        /* REKOMENDACJE I SIATKA PRODUKTÓW LIVAMIO */
+        .results-section {
+            display: none;
+            margin-top: 24px;
+        }
+
+        .recommendation-banner {
+            background: var(--accent-green-bg);
+            border: 1px solid var(--accent-green);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            color: #2a3321;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .recommendation-banner h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 4px;
+        }
+
+        .recommendation-pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .rec-pill {
+            background: #fff;
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* GRID PRODUKTÓW: 3 W RZĘDZIE */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .product-card {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(92, 67, 53, 0.08);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            z-index: 2;
+        }
+
+        .product-badge.badge-green {
+            background: var(--accent-green);
+        }
+
+        /* PLACEHOLDER DLA GRAFIKI Z PALETĄ LIVAMIO */
+        .product-image-holder {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            user-select: none;
+        }
+
+        .bg-preset-1 { background: linear-gradient(135deg, #f4efea 0%, #e2d7cb 100%); }
+        .bg-preset-2 { background: linear-gradient(135deg, #eae5df 0%, #d5c8ba 100%); }
+        .bg-preset-3 { background: linear-gradient(135deg, #f0f2ed 0%, #c8cebe 100%); }
+
+        .product-image-holder .icon {
+            font-size: 38px;
+            margin-bottom: 6px;
+        }
+
+        .product-image-holder .watermark {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--primary);
+            opacity: 0.4;
+            text-transform: uppercase;
+        }
+
+        .product-info {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .product-rating {
+            font-size: 11px;
+            color: #d4a373;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .product-rating .count {
+            color: var(--text-muted);
+            font-size: 10px;
+        }
+
+        .product-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .product-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            flex-grow: 1;
+        }
+
+        /* KOLORY SWATCHES */
+        .color-swatches {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .swatch {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.15);
+            cursor: pointer;
+        }
+
+        .swatch-beige { background: #d7c4b7; }
+        .swatch-brown { background: #5c4335; }
+        .swatch-grey { background: #8a8d8f; }
+        .swatch-olive { background: #6b705c; }
+
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .product-price {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price-current {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .price-old {
+            font-size: 11px;
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .btn-add-cart {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn-add-cart:hover {
+            background: var(--primary-hover);
+        }
+
+        @media (max-width: 992px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 850px) {
+            .app-layout {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                position: relative;
+                top: 0;
+            }
+        }
+
+        @media (max-width: 580px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-layout">
+
+    <!-- LEWY PANEL PŁYWĄCY -->
+    <aside class="sidebar">
+        <div id="returning-user-alert" class="alert-update" style="display: none;">
+            🔔 <strong>Reksio ma już 5 lat!</strong> Czy jego nawyki lub waga się zmieniły? Zaktualizuj profil.
+        </div>
+
+        <div class="sidebar-header">
+            <span class="sidebar-title">🐾 Profil Pupila</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span id="side-species" style="font-size: 12px; color: var(--text-muted);">-</span>
+                <button type="button" class="btn-edit-profile" onclick="enableProfileEdit()">Edytuj</button>
+            </div>
+        </div>
+
+        <div id="sidebar-summary">
+            <div class="summary-item"><span>Rasa:</span> <strong id="side-breed" class="summary-value-right">-</strong></div>
+            <div class="summary-item"><span>Wiek:</span> <strong id="side-age" class="summary-value-right">-</strong></div>
+            <div class="summary-item"><span>Wymiary:</span> <strong id="side-dims" class="summary-value-right">-</strong></div>
+            <div class="summary-item"><span>Waga:</span> <strong id="side-weight" class="summary-value-right">-</strong></div>
+            <div class="summary-item">
+                <span>Potrzeby:</span> 
+                <div id="side-tags" class="summary-value-right" style="font-weight: 600;">-</div>
+            </div>
+        </div>
+
+        <div class="save-profile-box">
+            <label style="font-size: 11px; font-weight: 600; display: block; margin-bottom: 6px; color: var(--text-muted);">ZAPISZ PROFIL:</label>
+            <input type="text" id="pet-name" class="input-text" placeholder="Imię pupila (np. Reksio)" style="margin-bottom: 6px;">
+            <button type="button" class="btn-save" onclick="savePetProfile()">Zapisz profil pupila</button>
+        </div>
+    </aside>
+
+    <!-- PRAWY PANEL KONFIGURATORA I PRODUKTÓW -->
+    <section>
+        <main class="main-content" id="main-content-card" onclick="handleCardClick()">
+            <header class="header">
+                <div class="header-bar">
+                    <h1>Dobierz idealne legowisko</h1>
+                    <button type="button" id="btn-toggle-config" class="btn-header-edit" style="display: none;" onclick="expandConfigurator(event)">Edytuj dane</button>
+                </div>
+                <p id="header-desc">Odpowiedz na kilka pytań o swoim pupilu, a nasz algorytm automatycznie obliczy optymalne wymiary oraz rekomendowane materiały dla pełnego komfortu.</p>
+            </header>
+
+            <div id="bed-finder">
+                <!-- KROK 0: WYBÓR GATUNKU -->
+                <div class="step-block">
+                    <div class="step-title">1. Wybierz gatunek</div>
+                    <div class="species-grid">
+                        <div class="species-card" id="card-dog" onclick="setSpecies('Pies')">🐶 PIES</div>
+                        <div class="species-card" id="card-cat" onclick="setSpecies('Kot')">🐱 KOT</div>
+                    </div>
+                </div>
+
+                <!-- KROK 1: RASA / MIESZANIEC -->
+                <div id="step-breed" class="step-block disabled">
+                    <div class="step-title">2. Rasa lub rasa dominująca</div>
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                        <input type="text" id="input-breed" class="input-text" list="breed-list" placeholder="Wpisz lub wybierz rasę..." oninput="handleBreedInput(this.value)" onclick="handleBreedFocus()" onfocus="handleBreedFocus()">
+                        <datalist id="breed-list"></datalist>
+                    </div>
+
+                    <label style="font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <input type="checkbox" id="chk-mixed" onchange="toggleMixedBreed(this.checked)">
+                        Rasa mieszana / Kundelek
+                    </label>
+
+                    <div id="mixed-size-box" style="display: none; margin-top: 10px;">
+                        <label style="font-size: 11px; font-weight: 600; display: block; margin-bottom: 4px; color: var(--text-muted);">Szacowany gabaryt i waga:</label>
+                        <select id="select-mixed-size" onchange="onMixedSizeChange()">
+                            <option value="small">Mały (do 10 kg)</option>
+                            <option value="medium" selected>Średni (10–25 kg)</option>
+                            <option value="large">Duży (25–45 kg)</option>
+                            <option value="xlarge">Bardzo duży (powyżej 45 kg)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- KROK 2: WIEK & WYMIARY -->
+                <div id="step-age" class="step-block disabled">
+                    <div class="step-title">3. Wiek & Wymiary</div>
+
+                    <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px;">Przedział wiekowy:</label>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px;">
+                        <button type="button" class="tag" onclick="selectAge('Szczeniak / Kociak (< 1 roku)', 1, this)">Szczeniak / Kociak (&lt; 1 roku)</button>
+                        <button type="button" class="tag" onclick="selectAge('Młody dorosły (1–3 lata)', 2, this)">Młody dorosły (1–3 lata)</button>
+                        <button type="button" class="tag" onclick="selectAge('Dojrzały dorosły (3–7 lat)', 3, this)">Dojrzały dorosły (3–7 lat)</button>
+                        <button type="button" class="tag" onclick="selectAge('Senior (7+ lat)', 4, this)">Senior (7+ lat)</button>
+                    </div>
+
+                    <div class="measure-info-card">
+                        <div class="measure-img">📐 LivaMio<br>Pies BEZ ogona</div>
+                        <div>
+                            <strong>Mierzenie & Zapas +15 cm:</strong><br>
+                            Mierzymy psa od nosa do nasady ogona. System dodaje automatycznie <strong>+15 cm zapasu</strong> na swobodne rozciągnięcie.
+                        </div>
+                    </div>
+
+                    <div class="dimensions-grid">
+                        <div>
+                            <label style="font-size: 11px; color: var(--text-muted);">Długość (cm)</label>
+                            <input type="text" id="dim-length" class="input-text" placeholder="ręcznie" oninput="updateSidebar()">
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; color: var(--text-muted);">Wysokość (cm)</label>
+                            <input type="text" id="dim-height" class="input-text" placeholder="ręcznie" oninput="updateSidebar()">
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; color: var(--text-muted);">Waga (kg)</label>
+                            <input type="text" id="dim-weight" class="input-text" placeholder="ręcznie" oninput="updateSidebar()">
+                        </div>
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; font-style: italic;">
+                        * Pola powyżej są edytowalne — kliknij i zmień podane wartości, jeśli Twój pupil różni się od standardu rasy.
+                    </div>
+
+                    <div id="health-alert-box" class="health-alert" style="display: none;"></div>
+                </div>
+
+                <!-- KROK 3: PREFERENCJE, ZACHOWANIE I SCHORZENIA -->
+                <div id="step-prefs" class="step-block disabled">
+                    <div class="step-title">4. Preferencje, zachowanie i schorzenia</div>
+
+                    <div style="margin-bottom: 14px;">
+                        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">Styl spania:</label>
+                        <div class="tag-group" data-group="sleep-style">
+                            <span class="tag" onclick="selectSingleTag(this)">Zwinięty w kłębek</span>
+                            <span class="tag" onclick="selectSingleTag(this)">Rozciągnięty na boku</span>
+                            <span class="tag" onclick="selectSingleTag(this)">Na brzuchu ("superman")</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 14px;">
+                        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">Miejsce spania:</label>
+                        <div class="tag-group" data-group="place">
+                            <span class="tag" onclick="selectSingleTag(this)">Salon / Sypialnia</span>
+                            <span class="tag" onclick="selectSingleTag(this)">Klatka kennelowa</span>
+                            <span class="tag" onclick="selectSingleTag(this)">Taras / Auto</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 14px;">
+                        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">Zachowanie:</label>
+                        <div class="tag-group" data-group="behavior">
+                            <span class="tag" onclick="selectSingleTag(this)">Lękliwy / Potrzebuje azylu</span>
+                            <span class="tag" onclick="selectSingleTag(this)">Gryzienie / Kopanie</span>
+                            <span class="tag" onclick="selectSingleTag(this)">Gubienie sierści / Brudzenie</span>
+                            <span class="tag" onclick="selectSingleTag(this)">Brak szczególnych zachowań</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 14px;">
+                        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">Temperatura:</label>
+                        <div class="tag-group" data-group="temp">
+                            <span class="tag" onclick="selectSingleTag(this)">Łatwo się przegrzewa</span>
+                            <span class="tag" onclick="selectSingleTag(this)">Zmarzluch / Wymaga pluszu</span>
+                            <span class="tag" onclick="selectSingleTag(this)">Neutralny</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 14px;">
+                        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">Schorzenia i potrzeby specjalne:</label>
+                        <div class="tag-group" data-group="health">
+                            <span class="tag" onclick="toggleMultiTag(this)">Problemy ze stawami / Dysplazja</span>
+                            <span class="tag" onclick="toggleMultiTag(this)">Nietrzymanie moczu (dodaj kocyk ochronny)</span>
+                            <span class="tag" onclick="toggleMultiTag(this)">Alergie skórne</span>
+                            <span class="tag" onclick="toggleMultiTag(this)">Nadwaga</span>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-submit" onclick="showResults(event)">Pokaż dopasowane legowiska</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- SEKCJA WYNIKÓW / GRID PRODUKTÓW (3 W RZĘDZIE) -->
+        <section id="results-section" class="results-section">
+            
+            <div class="recommendation-banner">
+                <div>
+                    <h3>✨ Dopasowano idealne legowiska LivaMio</h3>
+                    <p style="font-size: 12px; color: var(--text-muted);">Wyniki na podstawie wymiarów (+15cm zapasu) oraz wybranych preferencji.</p>
+                </div>
+                <div class="recommendation-pills">
+                    <span class="rec-pill">Rekomendowany rozmiar: L (60x80cm)</span>
+                    <span class="rec-pill">Wypełnienie: Ortopedyczne Visco</span>
+                    <span class="rec-pill">Powłoka: Easy Clean</span>
+                </div>
+            </div>
+
+            <div class="products-grid">
+
+                <!-- PRODUKT 1 -->
+                <div class="product-card">
+                    <span class="product-badge">99% Match</span>
+                    <div class="product-image-holder bg-preset-1">
+                        <div class="icon">🛌</div>
+                        <div class="watermark">LIVAMIO CLASSIC</div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-rating">★★★★★ <span class="count">(128 opinii)</span></div>
+                        <div class="product-title">Legowisko Ortopedyczne Royal Comfort</div>
+                        <div class="product-desc">Wyciszające brzegi, pianka z pamięcią kształtu Visco Memory. Zaokrąglone krawędzie wspierające stawy.</div>
+                        <div class="color-swatches">
+                            <span class="swatch swatch-beige"></span>
+                            <span class="swatch swatch-brown"></span>
+                            <span class="swatch swatch-grey"></span>
+                        </div>
+                        <div class="product-footer">
+                            <div class="product-price">
+                                <span class="price-current">329,00 zł</span>
+                                <span class="price-old">389,00 zł</span>
+                            </div>
+                            <button class="btn-add-cart">Wybierz opcje</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRODUKT 2 -->
+                <div class="product-card">
+                    <span class="product-badge badge-green">Dla Seniora</span>
+                    <div class="product-image-holder bg-preset-3">
+                        <div class="icon">🐶</div>
+                        <div class="watermark">LIVAMIO ORTHO</div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-rating">★★★★★ <span class="count">(94 opinie)</span></div>
+                        <div class="product-title">Materac Ortopedyczny Senior Care</div>
+                        <div class="product-desc">Płaski, obniżony próg wejścia, maksymalna ochrona kręgosłupa i bioder. Idealne dla starszych psów.</div>
+                        <div class="color-swatches">
+                            <span class="swatch swatch-olive"></span>
+                            <span class="swatch swatch-grey"></span>
+                        </div>
+                        <div class="product-footer">
+                            <div class="product-price">
+                                <span class="price-current">299,00 zł</span>
+                            </div>
+                            <button class="btn-add-cart">Wybierz opcje</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRODUKT 3 -->
+                <div class="product-card">
+                    <span class="product-badge">Azyl / Lęk</span>
+                    <div class="product-image-holder bg-preset-2">
+                        <div class="icon">🛋️</div>
+                        <div class="watermark">LIVAMIO HUG</div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-rating">★★★★☆ <span class="count">(67 opinii)</span></div>
+                        <div class="product-title">Legowisko Puf Otulający CoziHug</div>
+                        <div class="product-desc">Miękki materiał pluszowy imitujący matczyną sierść. Doskonałe dla psiaków lękliwych i zmarzluchów.</div>
+                        <div class="color-swatches">
+                            <span class="swatch swatch-beige"></span>
+                            <span class="swatch swatch-brown"></span>
+                        </div>
+                        <div class="product-footer">
+                            <div class="product-price">
+                                <span class="price-current">249,00 zł</span>
+                                <span class="price-old">279,00 zł</span>
+                            </div>
+                            <button class="btn-add-cart">Wybierz opcje</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRODUKT 4 -->
+                <div class="product-card">
+                    <span class="product-badge badge-green">Easy Clean</span>
+                    <div class="product-image-holder bg-preset-1">
+                        <div class="icon">💦</div>
+                        <div class="watermark">LIVAMIO SHIELD</div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-rating">★★★★★ <span class="count">(45 opinii)</span></div>
+                        <div class="product-title">Kanapa Hydrofobowa GuardPro</div>
+                        <div class="product-desc">Tkanina plamoodporna i wodoodporna. Sierść nie wnika w strukturę materiału, łatwe czyszczenie.</div>
+                        <div class="color-swatches">
+                            <span class="swatch swatch-grey"></span>
+                            <span class="swatch swatch-olive"></span>
+                        </div>
+                        <div class="product-footer">
+                            <div class="product-price">
+                                <span class="price-current">359,00 zł</span>
+                            </div>
+                            <button class="btn-add-cart">Wybierz opcje</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRODUKT 5 -->
+                <div class="product-card">
+                    <span class="product-badge">Wygoda</span>
+                    <div class="product-image-holder bg-preset-2">
+                        <div class="icon">🐾</div>
+                        <div class="watermark">LIVAMIO NEST</div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-rating">★★★★★ <span class="count">(82 opinie)</span></div>
+                        <div class="product-title">Legowisko Gniazdo PureRest</div>
+                        <div class="product-desc">Wysokie, miękkie boki pozwalające na wygodne oparcie głowy. Trwałe wypełnienie z kulki silikonowej.</div>
+                        <div class="color-swatches">
+                            <span class="swatch swatch-beige"></span>
+                            <span class="swatch swatch-olive"></span>
+                            <span class="swatch swatch-brown"></span>
+                        </div>
+                        <div class="product-footer">
+                            <div class="product-price">
+                                <span class="price-current">279,00 zł</span>
+                            </div>
+                            <button class="btn-add-cart">Wybierz opcje</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRODUKT 6 -->
+                <div class="product-card">
+                    <span class="product-badge badge-green">Premium</span>
+                    <div class="product-image-holder bg-preset-3">
+                        <div class="icon">✨</div>
+                        <div class="watermark">LIVAMIO VELVET</div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-rating">★★★★★ <span class="count">(112 opinii)</span></div>
+                        <div class="product-title">Kanapa Welurowa Velvet Dream</div>
+                        <div class="product-desc">Elegancki design do nowoczesnych wnętrz. Wyjmowana poduszka ortopedyczna z możliwością prania w 30°C.</div>
+                        <div class="color-swatches">
+                            <span class="swatch swatch-brown"></span>
+                            <span class="swatch swatch-grey"></span>
+                        </div>
+                        <div class="product-footer">
+                            <div class="product-price">
+                                <span class="price-current">389,00 zł</span>
+                                <span class="price-old">429,00 zł</span>
+                            </div>
+                            <button class="btn-add-cart">Wybierz opcje</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </section>
+
+</div>
+
+<script>
+    const breedsData = {
+        Pies: ["Owczarek Niemiecki", "Jamnik", "Labrador Retriever", "Golden Retriever", "Buldog Francuski", "Yorkshire Terrier"],
+        Kot: ["Sfinks", "Maine Coon", "Dachowiec", "Brytyjski Krótkowłosy", "Ragdoll"]
+    };
+
+    const breedDefaults = {
+        "Jamnik": {
+            1: { length: "30 cm", height: "18 cm", weight: "4 kg" },
+            2: { length: "45 cm", height: "25 cm", weight: "9 kg" },
+            3: { length: "45 cm", height: "25 cm", weight: "9 kg" },
+            4: { length: "45 cm", height: "25 cm", weight: "9 kg" }
+        }
+    };
+
+    let state = {
+        species: null,
+        breed: '',
+        isMixed: false,
+        age: '',
+        length: '',
+        height: '',
+        weight: '',
+        tags: []
+    };
+
+    window.onload = function() {
+        const saved = localStorage.getItem('petProfile');
+        if (saved) {
+            const profile = JSON.parse(saved);
+            if (profile.name) {
+                document.getElementById('pet-name').value = profile.name;
+            }
+            const saveDate = new Date(profile.savedAt);
+            const now = new Date();
+            const diffYears = (now - saveDate) / (1000 * 60 * 60 * 24 * 365);
+            
+            if (diffYears >= 2) {
+                document.getElementById('returning-user-alert').style.display = 'block';
+            }
+        }
+    };
+
+    function enableProfileEdit() {
+        expandConfigurator();
+        document.getElementById('step-breed').classList.remove('disabled');
+        document.getElementById('step-age').classList.remove('disabled');
+        document.getElementById('step-prefs').classList.remove('disabled');
+    }
+
+    function collapseConfigurator() {
+        const mainCard = document.getElementById('main-content-card');
+        const form = document.getElementById('bed-finder');
+        const desc = document.getElementById('header-desc');
+        const btnEdit = document.getElementById('btn-toggle-config');
+
+        mainCard.classList.add('collapsed');
+        form.style.display = 'none';
+        desc.style.display = 'none';
+        btnEdit.style.display = 'block';
+    }
+
+    function expandConfigurator(event) {
+        if (event) {
+            event.stopPropagation();
+        }
+        const mainCard = document.getElementById('main-content-card');
+        const form = document.getElementById('bed-finder');
+        const desc = document.getElementById('header-desc');
+        const btnEdit = document.getElementById('btn-toggle-config');
+
+        mainCard.classList.remove('collapsed');
+        form.style.display = 'block';
+        desc.style.display = 'block';
+        btnEdit.style.display = 'none';
+
+        // Ukrywamy listę produktów przy ponownej edycji
+        document.getElementById('results-section').style.display = 'none';
+    }
+
+    function handleCardClick() {
+        const mainCard = document.getElementById('main-content-card');
+        if (mainCard.classList.contains('collapsed')) {
+            expandConfigurator();
+        }
+    }
+
+    function setSpecies(s) {
+        state.species = s;
+        document.getElementById('card-dog').classList.toggle('selected', s === 'Pies');
+        document.getElementById('card-cat').classList.toggle('selected', s === 'Kot');
+        
+        const list = document.getElementById('breed-list');
+        list.innerHTML = '';
+        breedsData[s].forEach(b => {
+            let opt = document.createElement('option');
+            opt.value = b;
+            list.appendChild(opt);
+        });
+
+        document.getElementById('step-breed').classList.remove('disabled');
+        updateSidebar();
+    }
+
+    function handleBreedFocus() {
+        const chk = document.getElementById('chk-mixed');
+        if (chk.checked) {
+            chk.checked = false;
+            toggleMixedBreed(false);
+            const input = document.getElementById('input-breed');
+            input.focus();
+        }
+    }
+
+    function handleBreedInput(val) {
+        state.breed = val;
+        if (val.trim() !== '') {
+            document.getElementById('step-age').classList.remove('disabled');
+            document.getElementById('step-prefs').classList.remove('disabled');
+        }
+        updateSidebar();
+    }
+
+    function toggleMixedBreed(checked) {
+        state.isMixed = checked;
+        const input = document.getElementById('input-breed');
+        const mixedBox = document.getElementById('mixed-size-box');
+
+        if (checked) {
+            input.readOnly = true;
+            input.value = '';
+            state.breed = 'Rasa mieszana / Kundelek';
+            mixedBox.style.display = 'block';
+            clearDimensions();
+        } else {
+            input.readOnly = false;
+            mixedBox.style.display = 'none';
+            if (state.breed === 'Rasa mieszana / Kundelek') {
+                state.breed = '';
+            }
+        }
+        
+        document.getElementById('step-age').classList.remove('disabled');
+        document.getElementById('step-prefs').classList.remove('disabled');
+        updateSidebar();
+    }
+
+    function onMixedSizeChange() {
+        clearDimensions();
+        updateSidebar();
+    }
+
+    function selectAge(ageText, numIndex, btn) {
+        state.age = ageText;
+        btn.parentElement.querySelectorAll('.tag').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+
+        const lengthInput = document.getElementById('dim-length');
+        const heightInput = document.getElementById('dim-height');
+        const weightInput = document.getElementById('dim-weight');
+
+        if (!state.isMixed) {
+            const breedName = state.breed || 'Rasa';
+            
+            if (breedDefaults[breedName] && breedDefaults[breedName][numIndex]) {
+                const defaults = breedDefaults[breedName][numIndex];
+                lengthInput.value = defaults.length;
+                heightInput.value = defaults.height;
+                weightInput.value = defaults.weight;
+            } else {
+                lengthInput.value = `${breedName} ${numIndex} długość`;
+                heightInput.value = `${breedName} ${numIndex} wysokość`;
+                weightInput.value = `${breedName} ${numIndex} waga`;
+            }
+        } else {
+            clearDimensions();
+        }
+
+        const alertBox = document.getElementById('health-alert-box');
+        
+        if (ageText.includes('Senior')) {
+            alertBox.style.display = 'block';
+            alertBox.innerHTML = "💡 <strong>Rekomendacja ortopedyczna LivaMio:</strong> Dla seniora występuje wyższe ryzyko obciążenia stawów. Zalecamy wybór pianki ortopedycznej Visco z obniżonym progiem wejścia.";
+        } else {
+            alertBox.style.display = 'none';
+        }
+
+        updateSidebar();
+    }
+
+    function clearDimensions() {
+        document.getElementById('dim-length').value = '';
+        document.getElementById('dim-height').value = '';
+        document.getElementById('dim-weight').value = '';
+    }
+
+    function selectSingleTag(el) {
+        const parent = el.parentElement;
+        const isAlreadySelected = el.classList.contains('selected');
+        
+        parent.querySelectorAll('.tag').forEach(t => t.classList.remove('selected'));
+        
+        if (!isAlreadySelected) {
+            el.classList.add('selected');
+        }
+
+        updateSidebar();
+    }
+
+    function toggleMultiTag(el) {
+        el.classList.toggle('selected');
+        updateSidebar();
+    }
+
+    function updateSidebar() {
+        document.getElementById('side-species').innerText = state.species || '-';
+        document.getElementById('side-breed').innerText = state.breed || '-';
+        document.getElementById('side-age').innerText = state.age || '-';
+        
+        const l = document.getElementById('dim-length').value;
+        document.getElementById('side-dims').innerText = l ? `${l} (+15cm zapasu)` : '-';
+        document.getElementById('side-weight').innerText = document.getElementById('dim-weight').value || '-';
+
+        let selectedTags = [];
+        document.querySelectorAll('.tag-group .tag.selected').forEach(t => selectedTags.push(t.innerText));
+
+        const sideTagsContainer = document.getElementById('side-tags');
+        if (selectedTags.length > 0) {
+            sideTagsContainer.innerHTML = selectedTags.map(tag => `<div style="margin-bottom:2px;">${tag}</div>`).join('');
+        } else {
+            sideTagsContainer.innerText = '-';
+        }
+    }
+
+    function savePetProfile() {
+        const petName = document.getElementById('pet-name').value;
+        if (!petName) {
+            alert('Wpisz imię pupila!');
+            return;
+        }
+
+        const profileData = {
+            name: petName,
+            species: state.species,
+            breed: state.breed,
+            age: state.age,
+            savedAt: new Date().toISOString()
+        };
+
+        localStorage.setItem('petProfile', JSON.stringify(profileData));
+        alert(`Profil pupila ${petName} został pomyślnie zapisany w koncie!`);
+    }
+
+    /* AKCJA: ZWIJANIE I POKAZANIE GRIDU 3 KOLUMN PRODUKTÓW */
+    function showResults(event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        collapseConfigurator();
+        document.getElementById('results-section').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
